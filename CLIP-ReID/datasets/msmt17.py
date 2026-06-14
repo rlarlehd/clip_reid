@@ -21,7 +21,7 @@ class MSMT17(BaseImageDataset):
     # images: 32621 (train) + 11659 (query) + 82161 (gallery)
     # cameras: 15
     """
-    dataset_dir = 'MSMT17'
+    dataset_dir = 'msmt17'
 
     def __init__(self, root='', verbose=True, pid_begin=0, **kwargs):
         super(MSMT17, self).__init__()
@@ -63,19 +63,43 @@ class MSMT17(BaseImageDataset):
     def _process_dir(self, dir_path, list_path):
         with open(list_path, 'r') as txt:
             lines = txt.readlines()
+
         dataset = []
         pid_container = set()
         cam_container = set()
+
         for img_idx, img_info in enumerate(lines):
-            img_path, pid = img_info.split(' ')
-            pid = int(pid)  # no need to relabel
-            camid = int(img_path.split('_')[2])
-            img_path = osp.join(dir_path, img_path)
-            dataset.append((img_path, self.pid_begin+pid, camid-1, 0))
+            items = img_info.strip().split()
+            if len(items) < 2:
+                continue
+
+            img_rel_path, pid = items[0], items[1]
+            pid = int(pid)
+
+            # MSMT17 filename example:
+            # 0000/0000_045_12_0303morning_0006_2.jpg
+            # camera id = 12
+            img_name = osp.basename(img_rel_path)
+            parts = img_name.split('_')
+
+            if len(parts) < 3:
+                raise ValueError("Cannot parse camera id from filename: {}".format(img_name))
+
+            camid = int(parts[2])
+
+            img_path = osp.join(dir_path, img_rel_path)
+
+            if not osp.exists(img_path):
+                raise FileNotFoundError("Image not found: {}".format(img_path))
+
+            dataset.append((img_path, self.pid_begin + pid, camid - 1, 0))
             pid_container.add(pid)
             cam_container.add(camid)
-        print(cam_container, 'cam_container')
+
+        # print(sorted(cam_container), 'cam_container')
+
         # check if pid starts from 0 and increments with 1
-        for idx, pid in enumerate(pid_container):
-            assert idx == pid, "See code comment for explanation"
+        for idx, pid in enumerate(sorted(pid_container)):
+            assert idx == pid, "PID is not continuous: expected {}, got {}".format(idx, pid)
+
         return dataset

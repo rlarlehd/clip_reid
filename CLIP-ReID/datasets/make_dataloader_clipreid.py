@@ -1,3 +1,6 @@
+from .msmt17_fg import MSMT17_FG
+from .msmt17_bgswap import MSMT17_BGSwap
+
 import torch
 import torchvision.transforms as T
 from torch.utils.data import DataLoader
@@ -13,14 +16,26 @@ import torch.distributed as dist
 from .occ_duke import OCC_DukeMTMCreID
 from .vehicleid import VehicleID
 from .veri import VeRi
+from .msmt17_bgblur import MSMT17_BGBlur
+from .msmt17_queryswap import MSMT17_QuerySwap
+from .msmt17_galleryswap import MSMT17_GallerySwap
 
+from .msmt17_bgswap_bgblur import MSMT17_BGSwap_BGBlur
+from .msmt17_aug_bgswap import MSMT17_AugBGSwap
 __factory = {
     'market1501': Market1501,
     'dukemtmc': DukeMTMCreID,
     'msmt17': MSMT17,
+    'msmt17_fg': MSMT17_FG,
+    'msmt17_bgswap': MSMT17_BGSwap,
+    'msmt17_bgblur': MSMT17_BGBlur,
+    'msmt17_queryswap': MSMT17_QuerySwap,
+    'msmt17_galleryswap': MSMT17_GallerySwap,
+    'msmt17_bgswap_bgblur': MSMT17_BGSwap_BGBlur,
+    'msmt17_aug_bgswap': MSMT17_AugBGSwap,
     'occ_duke': OCC_DukeMTMCreID,
     'veri': VeRi,
-    'VehicleID': VehicleID
+    'VehicleID': VehicleID,
 }
 
 def train_collate_fn(batch):
